@@ -75,16 +75,12 @@ pub async fn sign_attendance(params: &SignParams) -> Result<Option<String>> {
 
             if let Some(code_value) = json.get("code").and_then(|v| v.as_i64()) {
                 if code_value == 20000 {
-                    println!("Found correct course code: {}", code);
                     let mut guard = found_code.lock().unwrap();
                     *guard = Some(code);
                 } else if code_value == 60001 {
                     // Course code invalid, skip
                 } else {
-                    // Other unexpected responses
-                    if let Some(msg) = json.get("msg").and_then(|v| v.as_str()) {
-                        println!("Unexpected response for code {}: {}", code, msg);
-                    }
+                    // Other unexpected responses（已移除调试日志）
                 }
             }
         }
@@ -97,7 +93,7 @@ pub async fn sign_attendance(params: &SignParams) -> Result<Option<String>> {
         .await;
 
     // Return the first successful course code found
-    Ok(*found_code.lock().unwrap())
+    Ok(found_code.lock().unwrap().clone())
 }
 
 /// Helper to validate parameters before brute-forcing

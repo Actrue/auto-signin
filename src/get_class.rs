@@ -6,8 +6,8 @@ use serde_json::Value;
 pub struct CourseInfo {
     pub classroom_name: String,
     pub attendance_state: i32,
-    pub course_plan_id: String,
-    pub attendance_id: String,
+    pub course_plan_id: i32,
+    pub attendance_id: i32,
 }
 
 pub  async  fn get_class(cookie: &str) -> Result<Option<Vec<CourseInfo>>, reqwest::Error> {
@@ -35,8 +35,8 @@ pub  async  fn get_class(cookie: &str) -> Result<Option<Vec<CourseInfo>>, reqwes
        .map(|item| CourseInfo {
             classroom_name: item["classroomName"].as_str().unwrap_or("").to_string(),
             attendance_state: item["attendanceState"].as_i64().unwrap_or(3) as i32,
-            course_plan_id: item["coursePlanId"].as_str().unwrap_or("").to_string(),
-            attendance_id: item["attendanceId"].as_str().unwrap_or("").to_string(),
+            course_plan_id: item["coursePlanId"].as_i64().unwrap_or(0) as i32,
+            attendance_id: item["attendanceId"].as_i64().unwrap_or(0) as i32,
         })
        .collect::<Vec<CourseInfo>>();
 
