@@ -21,7 +21,25 @@ async fn main() {
     
     let check_attendance = || async {
     match get_class::get_class(&cookie).await {
-        Ok(Some(courses)) => {
+        Ok(None) => {
+            eprintln!("Cookie无效或已过期，终止监听");
+            eprintln!("\n检测到无效cookie，程序将在3秒后退出...");
+            std::thread::sleep(std::time::Duration::from_secs(3));
+            std::process::exit(1);
+        }
+        Ok(Some(courses)) if !courses.is_empty() => {
+            println!("课程信息:");
+            for course in &courses {
+                println!("教室: {}, 考勤状态: {}", 
+                    course.classroom_name, 
+                    match course.attendance_state {
+                        3 => "未开课",
+                        0 => "未签到",
+                        1 => "已签到",
+                        2 => "迟到",
+                        _ => "未知状态"
+                    });
+            }
             for course in courses {
                 if course.attendance_state == 0 {
                     let params = attendance::SignParams {
@@ -34,7 +52,11 @@ async fn main() {
             }
             None
         }
-        _ => None,
+        Ok(Some(_)) => None,
+        Err(e) => {
+            eprintln!("请求失败: {}", e);
+            None
+        }
     }
 };
 
